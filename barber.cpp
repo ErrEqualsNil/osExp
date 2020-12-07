@@ -30,15 +30,13 @@ void print_arr(){
 void *Barber(void *args){
 	while(1){
 		sem_wait(&waiting_customers);
-		sem_wait(&mutex);
-		usleep(500);
+		sleep(5);
 		sem_post(&barber_ready);    
-		sem_post(&mutex);
 	}
 }
 
 void *Customer(void* args){
-	usleep(rand()%10 * 100);
+	//sleep(rand()%10);
 	sem_wait(&mutex);
 	cout<<"Customer Comming!"<<endl;
 	print_arr();
@@ -80,6 +78,7 @@ int main(int argc, char* argv[]){
 	sem_init(&barber_ready, 0, 1);
 	pthread_create(&barber, NULL, Barber, NULL);
 	for(int i=0;i<CUSTOMER_NUM;i++){
+		sleep(rand()%2+1);
 		pthread_create(&customer[i], NULL, Customer, NULL);
 	}
 	pthread_exit(NULL);
