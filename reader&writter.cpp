@@ -12,8 +12,6 @@ sem_t reading, writing;
 sem_t mutex;
 
 void* Reader(void* args){
-    int time_interval = rand()%10 * 100;
-    usleep(time_interval);
     sem_wait(&reading);
     sem_wait(&mutex);
     reading_readers++;
@@ -34,8 +32,6 @@ void* Reader(void* args){
 }
 
 void* Writer(void* args){
-    int time_interval = rand()%10 * 100;
-    usleep(time_interval);
     sem_wait(&writing);
     sem_wait(&mutex);
     writing_writers++;
@@ -44,7 +40,7 @@ void* Writer(void* args){
     }
     sem_post(&mutex);
     cout<<"Writer Writing..."<<endl;
-    sleep(1);
+    sleep(3);
     sem_wait(&mutex);
     writing_writers--;
     if(writing_writers == 0){
@@ -61,9 +57,23 @@ int main(int argc, char* argv[]){
     sem_init(&mutex, 0, 1);
     sem_init(&reading, 0, 1);
     sem_init(&writing, 0, 1);
-    for(int i=0;i<10;i++){
-        pthread_create(&readers[i], NULL, Reader, NULL);
-	pthread_create(&writers[i], NULL, Writer, NULL);
+    int read_cot, write_cot;
+    read_cot = write_cot = 0;
+    while(read_cot < 10 || write_cot < 10){
+	sleep(1);
+    	int choice = rand()%2;
+	if (choice == 0){
+		if(read_cot < 10)
+			pthread_create(&readers[read_cot++], NULL, Reader, NULL);
+		else
+			pthread_create(&writers[write_cot++], NULL, Writer, NULL);
+	}
+	else if(choice == 1){
+		if(write_cot < 10)
+			pthread_create(&writers[write_cot++], NULL, Writer, NULL);
+		else
+			pthread_create(&readers[read_cot++], NULL, Reader, NULL);
+	}
     }
     pthread_exit(NULL);
     return 0;
